@@ -1,0 +1,66 @@
+<project name="Go" default="build" basedir=".">
+
+    <description>
+	Build file for Ibis-Hadoop
+    </description>
+
+    <!-- Global properties -->
+
+    <property environment="env"/>
+
+    <property name="ipl" location="/home/niels/workspace/ipl/lib" />
+    <property name="hadoop" location="hadoop" />
+
+    <property name="version" value="" />
+
+    <property name="src" location="src" />
+    <property name="tmp" location="tmp" />
+    <property name="lib" location="lib" />
+    <property name="jar" location="lib/ibis-hadoop${version}.jar" />
+
+    <target name="build" description="build the examples">
+        <!-- Clean up -->
+        <delete dir="${tmp}" />
+        <delete dir="${lib}" />
+
+
+        <!-- Create the time stamp -->
+        <tstamp />
+
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${tmp}" />
+        <mkdir dir="${lib}" />
+
+        <path id="default.classpath">
+            <fileset dir="${hadoop}">
+                <include name="*.jar" />
+            </fileset>
+            <fileset dir="${ipl}">
+                <include name="*.jar" />
+            </fileset>
+        </path>
+
+        <!-- Compile the java code from ${src} into ${tmp} -->
+        <javac srcdir="${src}"
+               destdir="${tmp}"
+               debug="on"
+               source="1.5"
+               target="1.5"
+               classpathref="default.classpath">
+            <compilerarg value="-Xlint:unchecked" />
+        </javac>
+
+
+        <!-- Put everything in ${tmp} into the jar file -->
+        <jar jarfile="${jar}" basedir="${tmp}" />
+
+        <!-- And delete the build dir -->
+        <delete dir="${tmp}" />
+    </target>
+
+    <target name="clean" description="clean up">
+        <delete dir="${tmp}" />
+        <delete dir="${lib}" />
+    </target>
+
+</project>
