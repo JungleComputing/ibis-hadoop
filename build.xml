@@ -1,4 +1,4 @@
-<project name="Go" default="build" basedir=".">
+<project name="Ibis-Hadoop" default="build" basedir=".">
 
     <description>
 	Build file for Ibis-Hadoop
@@ -18,12 +18,34 @@
     <property name="lib" location="lib" />
     <property name="jar" location="lib/ibis-hadoop${version}.jar" />
 
-    <target name="build" description="build the examples">
-        <!-- Clean up -->
-        <delete dir="${tmp}" />
-        <delete dir="${lib}" />
+    <target name="build" description="build hadoop ibis" depends="clean,hadoop,copy-external,compile">
+    </target>
 
+    <target name="hadoop" description="build hadoop">
+    	<ant dir="hadoop" target="jar" />
+    </target>
 
+    <!-- Copy external libraries to lib directory -->
+    <target name="copy-external">
+        <mkdir dir="lib" />
+        <!-- IPL -->
+        <echo message="using ipl from ${ipl}" />
+        <copy todir="lib/ipl">
+            <fileset dir="${ipl}" />
+        </copy>
+         <!-- Hadoop -->
+        <echo message="using hadoop from ${hadoop}" />
+        <copy todir="lib/hadoop">
+            <fileset dir="${hadoop}/build" includes="*.jar"/>
+            <fileset dir="${hadoop}/lib" includes="*"/>
+        </copy>
+        <!-- Other -->
+        <copy todir="lib">
+            <fileset dir="external" includes="*.jar"/>
+        </copy>
+    </target>
+
+    <target name="compile" description="compile">
         <!-- Create the time stamp -->
         <tstamp />
 
@@ -32,10 +54,10 @@
         <mkdir dir="${lib}" />
 
         <path id="default.classpath">
-            <fileset dir="${hadoop}">
+            <fileset dir="lib/ipl">
                 <include name="*.jar" />
             </fileset>
-            <fileset dir="${ipl}">
+            <fileset dir="lib/hadoop">
                 <include name="*.jar" />
             </fileset>
         </path>
@@ -50,7 +72,6 @@
             <compilerarg value="-Xlint:unchecked" />
         </javac>
 
-
         <!-- Put everything in ${tmp} into the jar file -->
         <jar jarfile="${jar}" basedir="${tmp}" />
 
@@ -61,6 +82,8 @@
     <target name="clean" description="clean up">
         <delete dir="${tmp}" />
         <delete dir="${lib}" />
+
+    	<ant dir="hadoop" target="clean" />
     </target>
 
 </project>
