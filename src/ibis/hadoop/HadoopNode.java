@@ -71,10 +71,10 @@ public class HadoopNode {
 		// .getProperties(), -1);
 		// VirtualSocketFactory socketFactory = client.getFactory();
 
-		String serverAddress = InetAddress.getLocalHost().getHostAddress();
+		String localAddress = InetAddress.getLocalHost().getHostAddress();
 
 		ibis = IbisFactory.createIbis(ibisCapabilities, null, true, null, null,
-				serverAddress, new PortType[0]);
+				localAddress, new PortType[0]);
 
 		IbisIdentifier frontend;
 		if (isWorker) {
@@ -105,14 +105,12 @@ public class HadoopNode {
 		JobConf jobConf = new JobConf(configuration);
 
 		if (frontend.equals(ibis.identifier())) {
-			logger.info("I am the server!");
+			logger.info("Hadoop Server running on " + localAddress);
 
 			// format filesystem
 			NameNode.format(configuration);
 
 			NameNode namenode = NameNode.createNameNode(null, configuration);
-			
-
 
 			final JobTracker jobTracker = JobTracker.startTracker(jobConf);
 
@@ -131,7 +129,7 @@ public class HadoopNode {
 
 			logger.info("Server initialized");
 		} else {
-			logger.info("I am a worker.");
+			logger.info("Hadoop Worker running on " + localAddress);
 
 			String serverVirtualSocketAddress = frontend.tagAsString();
 

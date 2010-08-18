@@ -18,8 +18,9 @@
 
 package org.apache.hadoop.io;
 
+import ibis.smartsockets.virtual.VirtualSocket;
+
 import java.io.*;
-import java.net.Socket;
 
 import org.apache.commons.logging.Log;
 
@@ -155,7 +156,7 @@ public class IOUtils {
    * Closes the socket ignoring {@link IOException} 
    * @param sock the Socket to close
    */
-  public static void closeSocket( Socket sock ) {
+  public static void closeSocket( VirtualSocket sock ) {
     // avoids try { close() } dance
     if ( sock != null ) {
       try {

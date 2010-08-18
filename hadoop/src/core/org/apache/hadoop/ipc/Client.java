@@ -18,7 +18,10 @@
 
 package org.apache.hadoop.ipc;
 
-import java.net.Socket;
+import ibis.smartsockets.virtual.VirtualSocket;
+import ibis.smartsockets.virtual.VirtualSocketAddress;
+import ibis.smartsockets.virtual.VirtualSocketFactory;
+
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -37,8 +40,6 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.net.SocketFactory;
 
 import org.apache.commons.logging.*;
 
@@ -74,7 +75,7 @@ public class Client {
   private boolean tcpNoDelay; // if T then disable Nagle's Algorithm
   private int pingInterval; // how often sends ping to the server in msecs
 
-  private SocketFactory socketFactory;           // how to create sockets
+  private VirtualSocketFactory socketFactory;           // how to create sockets
   private int refCount = 1;
   
   final private static String PING_INTERVAL_NAME = "ipc.ping.interval";
@@ -174,11 +175,11 @@ public class Client {
    * socket connected to a remote address.  Calls are multiplexed through this
    * socket: responses may be delivered out of order. */
   private class Connection extends Thread {
-    private InetSocketAddress server;             // server ip:port
+    private VirtualSocketAddress server;             // server ip:port
     private ConnectionHeader header;              // connection header
     private ConnectionId remoteId;                // connection id
     
-    private Socket socket = null;                 // connected socket
+    private VirtualSocket socket = null;                 // connected socket
     private DataInputStream in;
     private DataOutputStream out;
     
@@ -191,10 +192,6 @@ public class Client {
     public Connection(ConnectionId remoteId) throws IOException {
       this.remoteId = remoteId;
       this.server = remoteId.getAddress();
-      if (server.isUnresolved()) {
-        throw new UnknownHostException("unknown host: " + 
-                                       remoteId.getAddress().getHostName());
-      }
       
       UserGroupInformation ticket = remoteId.getTicket();
       Class<?> protocol = remoteId.getProtocol();
@@ -298,10 +295,10 @@ public class Client {
         }
         while (true) {
           try {
-            this.socket = socketFactory.createSocket();
+            this.socket = socketFactory.createClientSocket(remoteId.getAddress(), 20000, null);
             this.socket.setTcpNoDelay(tcpNoDelay);
             // connection time out is 20s
-            NetUtils.connect(this.socket, remoteId.getAddress(), 20000);
+//            NetUtils.connect(this.socket, remoteId.getAddress(), 20000);
             this.socket.setSoTimeout(pingInterval);
             break;
           } catch (SocketTimeoutException toe) {
@@ -314,9 +311,9 @@ public class Client {
           }
         }
         this.in = new DataInputStream(new BufferedInputStream
-            (new PingInputStream(NetUtils.getInputStream(socket))));
+            (new PingInputStream(socket.getInputStream())));
         this.out = new DataOutputStream
-            (new BufferedOutputStream(NetUtils.getOutputStream(socket)));
+            (new BufferedOutputStream(socket.getOutputStream()));
         writeHeader();
 
         // update last activity time
@@ -419,7 +416,7 @@ public class Client {
       }
     }
 
-    public InetSocketAddress getRemoteAddress() {
+    public VirtualSocketAddress getRemoteAddress() {
       return server;
     }
 
@@ -625,7 +622,7 @@ public class Client {
   /** Construct an IPC client whose values are of the given {@link Writable}
    * class. */
   public Client(Class<? extends Writable> valueClass, Configuration conf, 
-      SocketFactory factory) {
+      VirtualSocketFactory factory) {
     this.valueClass = valueClass;
     this.maxIdleTime = 
       conf.getInt("ipc.client.connection.maxidletime", 10000); //10s
@@ -643,8 +640,9 @@ public class Client {
    * Construct an IPC client with the default SocketFactory
    * @param valueClass
    * @param conf
+ * @throws Exception 
    */
-  public Client(Class<? extends Writable> valueClass, Configuration conf) {
+  public Client(Class<? extends Writable> valueClass, Configuration conf) throws Exception {
     this(valueClass, conf, NetUtils.getDefaultSocketFactory(conf));
   }
  
@@ -652,7 +650,7 @@ public class Client {
    *
    * @return this client's socket factory
    */
-  SocketFactory getSocketFactory() {
+  VirtualSocketFactory getSocketFactory() {
     return socketFactory;
   }
 
@@ -689,7 +687,7 @@ public class Client {
    * @deprecated Use {@link #call(Writable, InetSocketAddress, Class, UserGroupInformation)} instead 
    */
   @Deprecated
-  public Writable call(Writable param, InetSocketAddress address)
+  public Writable call(Writable param, VirtualSocketAddress address)
   throws InterruptedException, IOException {
       return call(param, address, null);
   }
@@ -702,7 +700,7 @@ public class Client {
    * @deprecated Use {@link #call(Writable, InetSocketAddress, Class, UserGroupInformation)} instead 
    */
   @Deprecated
-  public Writable call(Writable param, InetSocketAddress addr, 
+  public Writable call(Writable param, VirtualSocketAddress addr, 
       UserGroupInformation ticket)  
       throws InterruptedException, IOException {
     return call(param, addr, null, ticket);
@@ -713,7 +711,7 @@ public class Client {
    * with the <code>ticket</code> credentials, returning the value.  
    * Throws exceptions if there are network problems or if the remote code 
    * threw an exception. */
-  public Writable call(Writable param, InetSocketAddress addr, 
+  public Writable call(Writable param, VirtualSocketAddress addr, 
                        Class<?> protocol, UserGroupInformation ticket)  
                        throws InterruptedException, IOException {
     Call call = new Call(param);
@@ -760,7 +758,7 @@ public class Client {
    * @param exception the relevant exception
    * @return an exception to throw
    */
-  private IOException wrapException(InetSocketAddress addr,
+  private IOException wrapException(VirtualSocketAddress addr,
                                          IOException exception) {
     if (exception instanceof ConnectException) {
       //connection refused; include the host:port in the error
@@ -787,7 +785,7 @@ public class Client {
    * @deprecated Use {@link #call(Writable[], InetSocketAddress[], Class, UserGroupInformation)} instead 
    */
   @Deprecated
-  public Writable[] call(Writable[] params, InetSocketAddress[] addresses)
+  public Writable[] call(Writable[] params, VirtualSocketAddress[] addresses)
     throws IOException {
     return call(params, addresses, null, null);
   }
@@ -796,7 +794,7 @@ public class Client {
    * corresponding address.  When all values are available, or have timed out
    * or errored, the collected results are returned in an array.  The array
    * contains nulls for calls that timed out or errored.  */
-  public Writable[] call(Writable[] params, InetSocketAddress[] addresses, 
+  public Writable[] call(Writable[] params, VirtualSocketAddress[] addresses, 
                          Class<?> protocol, UserGroupInformation ticket)
     throws IOException {
     if (addresses.length == 0) return new Writable[0];
@@ -828,7 +826,7 @@ public class Client {
 
   /** Get a connection from the pool, or create a new one and add it to the
    * pool.  Connections to a given host/port are reused. */
-  private Connection getConnection(InetSocketAddress addr,
+  private Connection getConnection(VirtualSocketAddress addr,
                                    Class<?> protocol,
                                    UserGroupInformation ticket,
                                    Call call)
@@ -866,19 +864,19 @@ public class Client {
    * to servers are uniquely identified by <remoteAddress, protocol, ticket>
    */
   private static class ConnectionId {
-    InetSocketAddress address;
+    VirtualSocketAddress address;
     UserGroupInformation ticket;
     Class<?> protocol;
     private static final int PRIME = 16777619;
     
-    ConnectionId(InetSocketAddress address, Class<?> protocol, 
+    ConnectionId(VirtualSocketAddress address, Class<?> protocol, 
                  UserGroupInformation ticket) {
       this.protocol = protocol;
       this.address = address;
       this.ticket = ticket;
     }
     
-    InetSocketAddress getAddress() {
+    VirtualSocketAddress getAddress() {
       return address;
     }
     
