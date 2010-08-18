@@ -1804,7 +1804,6 @@ public class JobTracker implements MRConstants, InterTrackerProtocol,
   public static InetSocketAddress getAddress(Configuration conf) {
     String jobTrackerStr =
       conf.get("mapred.job.tracker", "localhost:8012");
-    System.err.println("XXXXXXXXXXXXXXXXX" + jobTrackerStr);
     return NetUtils.createSocketAddr(jobTrackerStr);
   }
 

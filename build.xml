@@ -37,7 +37,7 @@
         <echo message="using hadoop from ${hadoop}" />
         <copy todir="lib/hadoop">
             <fileset dir="${hadoop}/build" includes="*.jar"/>
-            <fileset dir="${hadoop}/lib" includes="*"/>
+            <fileset dir="${hadoop}/lib"/>
         </copy>
         <!-- Other -->
         <copy todir="lib">

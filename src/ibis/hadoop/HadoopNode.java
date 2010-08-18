@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class HadoopNode {
-	
+
 	public static final int HDFS_PORT = 6000;
 	public static final int MAPREDUCE_PORT = 6001;
 
@@ -67,15 +67,14 @@ public class HadoopNode {
 	public HadoopNode(boolean isWorker, File tmp) throws Exception {
 
 		// smartsockets init, via ipl support mechanism
-//		Client client = Client.getOrCreateClient("hadoop", System
-//				.getProperties(), -1);
-//		VirtualSocketFactory socketFactory = client.getFactory();
-		
-		String serverAddress = InetAddress.getLocalHost().toString();
+		// Client client = Client.getOrCreateClient("hadoop", System
+		// .getProperties(), -1);
+		// VirtualSocketFactory socketFactory = client.getFactory();
+
+		String serverAddress = InetAddress.getLocalHost().getHostAddress();
 
 		ibis = IbisFactory.createIbis(ibisCapabilities, null, true, null, null,
-				serverAddress,
-				new PortType[0]);
+				serverAddress, new PortType[0]);
 
 		IbisIdentifier frontend;
 		if (isWorker) {
@@ -85,44 +84,82 @@ public class HadoopNode {
 			// try to win election
 			frontend = ibis.registry().elect("frontend");
 		}
-		
-		Configuration configuration = new Configuration(true);
-		
-		configuration.set("hadoop.tmp.dir", tmp.getAbsolutePath());
-		configuration.set("fs.default.name", "hdfs://" + frontend.tagAsString() + ":" + HDFS_PORT);
-		configuration.set("mapred.job.tracker", frontend.tagAsString() + ":" + MAPREDUCE_PORT);
 
-		JobConf jobConf = new JobConf();
-		jobConf.set("hadoop.tmp.dir", tmp.getAbsolutePath());
-		jobConf.set("fs.default.name", "hdfs://" + frontend.tagAsString() + ":" + HDFS_PORT);
-		jobConf.set("mapred.job.tracker", frontend.tagAsString() + ":" + MAPREDUCE_PORT);
+		// set some system properties normally set by the hadoop script
+		System.setProperty("hadoop.log.dir", tmp.getAbsolutePath()
+				+ File.separator + "logs");
+		System.setProperty("hadoop.log.file", "hadoop.log");
+		System.setProperty("hadoop.home.dir", ".");
+		System.setProperty("hadoop.id.str", InetAddress.getLocalHost()
+				.getCanonicalHostName());
+		System.setProperty("hadoop.policy.file", "hadoop-policy.xml");
+
+		Configuration configuration = new Configuration(true);
+
+		configuration.set("hadoop.tmp.dir", tmp.getAbsolutePath());
+		configuration.set("fs.default.name", "hdfs://" + frontend.tagAsString()
+				+ ":" + HDFS_PORT);
+		configuration.set("mapred.job.tracker", frontend.tagAsString() + ":"
+				+ MAPREDUCE_PORT);
+
+		JobConf jobConf = new JobConf(configuration);
 
 		if (frontend.equals(ibis.identifier())) {
 			logger.info("I am the server!");
 
 			// format filesystem
 			NameNode.format(configuration);
-			
+
 			NameNode namenode = NameNode.createNameNode(null, configuration);
+			
 
-			JobTracker jobTracker = JobTracker.startTracker(jobConf);
-			jobTracker.offerService();
 
+			final JobTracker jobTracker = JobTracker.startTracker(jobConf);
+
+			Thread thread = new Thread() {
+
+				public void run() {
+					try {
+						jobTracker.offerService();
+					} catch (Exception e) {
+						logger.error("Exception in jobtracker", e);
+					}
+				}
+			};
+			thread.setDaemon(true);
+			thread.start();
+
+			logger.info("Server initialized");
 		} else {
 			logger.info("I am a worker.");
-			
+
 			String serverVirtualSocketAddress = frontend.tagAsString();
 
 			// clean tmp filesystem
-			
+
+			delete(new File(tmp, "dfs"));
+
 			DataNode datanode = DataNode.createDataNode(null, configuration);
 
 			TaskTracker taskTracker = new TaskTracker(jobConf);
 
-			//start task tracker
+			// start task tracker
 			Thread thread = new Thread(taskTracker);
 			thread.setDaemon(true);
 			thread.start();
+
+			logger.info("Worker initialized");
+		}
+	}
+
+	// recursive delete
+	private static void delete(File file) {
+		if (file.isDirectory()) {
+			for (File child : file.listFiles()) {
+				delete(child);
+			}
+		} else {
+			file.delete();
 		}
 	}
 
@@ -155,7 +192,8 @@ public class HadoopNode {
 
 		boolean worker = false;
 
-		File tmp = new File(System.getProperty("java.io.tmpdir") + File.separator + "hadoop-tmp");
+		File tmp = new File(System.getProperty("java.io.tmpdir")
+				+ File.separator + "hadoop-tmp");
 
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equalsIgnoreCase("--worker")
@@ -180,6 +218,8 @@ public class HadoopNode {
 			e.printStackTrace(System.err);
 			System.exit(1);
 		}
+
+		System.err.println("Hadoop node started");
 
 		// register shutdown hook
 		try {

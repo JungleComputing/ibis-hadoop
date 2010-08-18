@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# This script is a convenience script to automatically set the correct
+# classpath for the IPL given the location of a IPL installation,
+# specified in the $IPL_HOME environment variable.
+
+# Run ...
+# Note: this requires Java 6
+
+while [ $# -gt 0 ]
+do
+
+        HEADER=`echo $1 | sed 's/\(..\).*/\1/'`
+
+        case "$HEADER" in
+        -D)
+                SPECIAL="$SPECIAL $1"
+                ;;
+        *)
+                NORMAL="$NORMAL $1"
+                ;;
+        esac
+        shift
+done
+
+
+exec java \
+    -classpath "lib/hadoop/:lib/"'*':lib/ipl/'*':lib/hadoop/jsp-2.1/'*':lib/hadoop/'*':lib/hadoop/jdiff -Djava.library.path=lib/hadoop/native \
+    -Dlog4j.configuration=file:log4j.properties $SPECIAL ibis.hadoop.HadoopNode $NORMAL
+    
