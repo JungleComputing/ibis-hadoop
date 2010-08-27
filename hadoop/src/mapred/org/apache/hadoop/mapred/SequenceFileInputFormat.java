@@ -27,41 +27,41 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.MapFile;
 
-/** An {@link InputFormat} for {@link SequenceFile}s. 
- * @deprecated Use 
- *  {@link org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat} 
- *  instead.
+/**
+ * An {@link InputFormat} for {@link SequenceFile}s.
+ * 
+ * @deprecated Use
+ *             {@link org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat}
+ *             instead.
  */
 @Deprecated
 public class SequenceFileInputFormat<K, V> extends FileInputFormat<K, V> {
 
-  public SequenceFileInputFormat() {
-    setMinSplitSize(SequenceFile.SYNC_INTERVAL);
-  }
-  
-  @Override
-  protected FileStatus[] listStatus(JobConf job) throws IOException {
-    FileStatus[] files = super.listStatus(job);
-    for (int i = 0; i < files.length; i++) {
-      FileStatus file = files[i];
-      if (file.isDir()) {     // it's a MapFile
-        Path dataFile = new Path(file.getPath(), MapFile.DATA_FILE_NAME);
-        FileSystem fs = file.getPath().getFileSystem(job);
-        // use the data file
-        files[i] = fs.getFileStatus(dataFile);
-      }
-    }
-    return files;
-  }
+	public SequenceFileInputFormat() {
+		setMinSplitSize(SequenceFile.SYNC_INTERVAL);
+	}
 
-  public RecordReader<K, V> getRecordReader(InputSplit split,
-                                      JobConf job, Reporter reporter)
-    throws IOException {
+	@Override
+	protected FileStatus[] listStatus(JobConf job) throws IOException {
+		FileStatus[] files = super.listStatus(job);
+		for (int i = 0; i < files.length; i++) {
+			FileStatus file = files[i];
+			if (file.isDir()) { // it's a MapFile
+				Path dataFile = new Path(file.getPath(), MapFile.DATA_FILE_NAME);
+				FileSystem fs = file.getPath().getFileSystem(job);
+				// use the data file
+				files[i] = fs.getFileStatus(dataFile);
+			}
+		}
+		return files;
+	}
 
-    reporter.setStatus(split.toString());
+	public RecordReader<K, V> getRecordReader(InputSplit split, JobConf job,
+			Reporter reporter) throws IOException {
 
-    return new SequenceFileRecordReader<K, V>(job, (FileSplit) split);
-  }
+		reporter.setStatus(split.toString());
+
+		return new SequenceFileRecordReader<K, V>(job, (FileSplit) split);
+	}
 
 }
-

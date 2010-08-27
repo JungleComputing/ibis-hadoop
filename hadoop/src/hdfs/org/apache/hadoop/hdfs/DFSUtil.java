@@ -22,30 +22,28 @@ import java.util.StringTokenizer;
 import org.apache.hadoop.fs.Path;
 
 public class DFSUtil {
-  /**
-   * Whether the pathname is valid.  Currently prohibits relative paths, 
-   * and names which contain a ":" or "/" 
-   */
-  public static boolean isValidName(String src) {
-      
-    // Path must be absolute.
-    if (!src.startsWith(Path.SEPARATOR)) {
-      return false;
-    }
-      
-    // Check for ".." "." ":" "/"
-    StringTokenizer tokens = new StringTokenizer(src, Path.SEPARATOR);
-    while(tokens.hasMoreTokens()) {
-      String element = tokens.nextToken();
-      if (element.equals("..") || 
-          element.equals(".")  ||
-          (element.indexOf(":") >= 0)  ||
-          (element.indexOf("/") >= 0)) {
-        return false;
-      }
-    }
-    return true;
-  }
+	/**
+	 * Whether the pathname is valid. Currently prohibits relative paths, and
+	 * names which contain a ":" or "/"
+	 */
+	public static boolean isValidName(String src) {
+
+		// Path must be absolute.
+		if (!src.startsWith(Path.SEPARATOR)) {
+			return false;
+		}
+
+		// Check for ".." "." ":" "/"
+		StringTokenizer tokens = new StringTokenizer(src, Path.SEPARATOR);
+		while (tokens.hasMoreTokens()) {
+			String element = tokens.nextToken();
+			if (element.equals("..") || element.equals(".")
+					|| (element.indexOf(":") >= 0)
+					|| (element.indexOf("/") >= 0)) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 }
-

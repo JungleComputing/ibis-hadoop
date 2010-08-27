@@ -29,23 +29,24 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-/** An {@link InputFormat} for plain text files.  Files are broken into lines.
- * Either linefeed or carriage-return are used to signal end of line.  Keys are
- * the position in the file, and values are the line of text.. */
+/**
+ * An {@link InputFormat} for plain text files. Files are broken into lines.
+ * Either linefeed or carriage-return are used to signal end of line. Keys are
+ * the position in the file, and values are the line of text..
+ */
 public class TextInputFormat extends FileInputFormat<LongWritable, Text> {
 
-  @Override
-  public RecordReader<LongWritable, Text> 
-    createRecordReader(InputSplit split,
-                       TaskAttemptContext context) {
-    return new LineRecordReader();
-  }
+	@Override
+	public RecordReader<LongWritable, Text> createRecordReader(
+			InputSplit split, TaskAttemptContext context) {
+		return new LineRecordReader();
+	}
 
-  @Override
-  protected boolean isSplitable(JobContext context, Path file) {
-    CompressionCodec codec = 
-      new CompressionCodecFactory(context.getConfiguration()).getCodec(file);
-    return codec == null;
-  }
+	@Override
+	protected boolean isSplitable(JobContext context, Path file) {
+		CompressionCodec codec = new CompressionCodecFactory(context
+				.getConfiguration()).getCodec(file);
+		return codec == null;
+	}
 
 }

@@ -33,54 +33,55 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.lib.CombineFileSplit;
 
 /**
- * A sub-collection of input files. Unlike {@link FileSplit}, MultiFileSplit 
- * class does not represent a split of a file, but a split of input files 
- * into smaller sets. The atomic unit of split is a file. <br> 
- * MultiFileSplit can be used to implement {@link RecordReader}'s, with 
- * reading one record per file.
+ * A sub-collection of input files. Unlike {@link FileSplit}, MultiFileSplit
+ * class does not represent a split of a file, but a split of input files into
+ * smaller sets. The atomic unit of split is a file. <br>
+ * MultiFileSplit can be used to implement {@link RecordReader}'s, with reading
+ * one record per file.
+ * 
  * @see FileSplit
- * @see MultiFileInputFormat 
+ * @see MultiFileInputFormat
  * @deprecated Use {@link org.apache.hadoop.mapred.lib.CombineFileSplit} instead
  */
 @Deprecated
 public class MultiFileSplit extends CombineFileSplit {
 
-  MultiFileSplit() {}
-  
-  public MultiFileSplit(JobConf job, Path[] files, long[] lengths) {
-    super(job, files, lengths);
-  }
+	MultiFileSplit() {
+	}
 
-  public String[] getLocations() throws IOException {
-    HashSet<String> hostSet = new HashSet<String>();
-    for (Path file : getPaths()) {
-      FileSystem fs = file.getFileSystem(getJob());
-      FileStatus status = fs.getFileStatus(file);
-      BlockLocation[] blkLocations = fs.getFileBlockLocations(status,
-                                          0, status.getLen());
-      if (blkLocations != null && blkLocations.length > 0) {
-        addToSet(hostSet, blkLocations[0].getHosts());
-      }
-    }
-    return hostSet.toArray(new String[hostSet.size()]);
-  }
+	public MultiFileSplit(JobConf job, Path[] files, long[] lengths) {
+		super(job, files, lengths);
+	}
 
-  private void addToSet(Set<String> set, String[] array) {
-    for(String s:array)
-      set.add(s); 
-  }
+	public String[] getLocations() throws IOException {
+		HashSet<String> hostSet = new HashSet<String>();
+		for (Path file : getPaths()) {
+			FileSystem fs = file.getFileSystem(getJob());
+			FileStatus status = fs.getFileStatus(file);
+			BlockLocation[] blkLocations = fs.getFileBlockLocations(status, 0,
+					status.getLen());
+			if (blkLocations != null && blkLocations.length > 0) {
+				addToSet(hostSet, blkLocations[0].getHosts());
+			}
+		}
+		return hostSet.toArray(new String[hostSet.size()]);
+	}
 
-  @Override
-  public String toString() {
-    StringBuffer sb = new StringBuffer();
-    for(int i=0; i < getPaths().length; i++) {
-      sb.append(getPath(i).toUri().getPath() + ":0+" + getLength(i));
-      if (i < getPaths().length -1) {
-        sb.append("\n");
-      }
-    }
+	private void addToSet(Set<String> set, String[] array) {
+		for (String s : array)
+			set.add(s);
+	}
 
-    return sb.toString();
-  }
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < getPaths().length; i++) {
+			sb.append(getPath(i).toUri().getPath() + ":0+" + getLength(i));
+			if (i < getPaths().length - 1) {
+				sb.append("\n");
+			}
+		}
+
+		return sb.toString();
+	}
 }
-

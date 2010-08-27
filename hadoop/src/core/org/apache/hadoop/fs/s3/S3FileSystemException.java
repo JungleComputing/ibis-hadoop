@@ -23,7 +23,7 @@ import java.io.IOException;
  * Thrown when there is a fatal exception while using {@link S3FileSystem}.
  */
 public class S3FileSystemException extends IOException {
-  public S3FileSystemException(String message) {
-    super(message);
-  }
+	public S3FileSystemException(String message) {
+		super(message);
+	}
 }

@@ -28,49 +28,49 @@ import org.apache.hadoop.security.UnixUserGroupInformation;
 import org.apache.hadoop.conf.*;
 
 public class StreamFile extends DfsServlet {
-  static InetSocketAddress nameNodeAddr;
-  static DataNode datanode = null;
-  private static final Configuration masterConf = new Configuration();
-  static {
-    if ((datanode = DataNode.getDataNode()) != null) {
-      nameNodeAddr = datanode.getNameNodeAddr();
-    }
-  }
-  
-  /** getting a client for connecting to dfs */
-  protected DFSClient getDFSClient(HttpServletRequest request)
-      throws IOException {
-    Configuration conf = new Configuration(masterConf);
-    UnixUserGroupInformation.saveToConf(conf,
-        UnixUserGroupInformation.UGI_PROPERTY_NAME, getUGI(request));
-    return new DFSClient(nameNodeAddr, conf);
-  }
-  
-  public void doGet(HttpServletRequest request, HttpServletResponse response)
-    throws ServletException, IOException {
-    String filename = request.getParameter("filename");
-    if (filename == null || filename.length() == 0) {
-      response.setContentType("text/plain");
-      PrintWriter out = response.getWriter();
-      out.print("Invalid input");
-      return;
-    }
-    DFSClient dfs = getDFSClient(request);
-    FSInputStream in = dfs.open(filename);
-    OutputStream os = response.getOutputStream();
-    response.setHeader("Content-Disposition", "attachment; filename=\"" + 
-                       filename + "\"");
-    response.setContentType("application/octet-stream");
-    byte buf[] = new byte[4096];
-    try {
-      int bytesRead;
-      while ((bytesRead = in.read(buf)) != -1) {
-        os.write(buf, 0, bytesRead);
-      }
-    } finally {
-      in.close();
-      os.close();
-      dfs.close();
-    }
-  }
+	static InetSocketAddress nameNodeAddr;
+	static DataNode datanode = null;
+	private static final Configuration masterConf = new Configuration();
+	static {
+		if ((datanode = DataNode.getDataNode()) != null) {
+			nameNodeAddr = datanode.getNameNodeAddr();
+		}
+	}
+
+	/** getting a client for connecting to dfs */
+	protected DFSClient getDFSClient(HttpServletRequest request)
+			throws IOException {
+		Configuration conf = new Configuration(masterConf);
+		UnixUserGroupInformation.saveToConf(conf,
+				UnixUserGroupInformation.UGI_PROPERTY_NAME, getUGI(request));
+		return new DFSClient(nameNodeAddr, conf);
+	}
+
+	public void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String filename = request.getParameter("filename");
+		if (filename == null || filename.length() == 0) {
+			response.setContentType("text/plain");
+			PrintWriter out = response.getWriter();
+			out.print("Invalid input");
+			return;
+		}
+		DFSClient dfs = getDFSClient(request);
+		FSInputStream in = dfs.open(filename);
+		OutputStream os = response.getOutputStream();
+		response.setHeader("Content-Disposition", "attachment; filename=\""
+				+ filename + "\"");
+		response.setContentType("application/octet-stream");
+		byte buf[] = new byte[4096];
+		try {
+			int bytesRead;
+			while ((bytesRead = in.read(buf)) != -1) {
+				os.write(buf, 0, bytesRead);
+			}
+		} finally {
+			in.close();
+			os.close();
+			dfs.close();
+		}
+	}
 }

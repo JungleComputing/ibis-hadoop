@@ -28,39 +28,40 @@ import org.apache.hadoop.hdfs.server.common.UpgradeObjectCollection.UOSignature;
  * interface.
  */
 public abstract class UpgradeObject implements Upgradeable {
-  protected short status;
-  
-  public short getUpgradeStatus() {
-    return status;
-  }
+	protected short status;
 
-  public String getDescription() {
-    return "Upgrade object for " + getType() + " layout version " + getVersion();
-  }
+	public short getUpgradeStatus() {
+		return status;
+	}
 
-  public UpgradeStatusReport getUpgradeStatusReport(boolean details) 
-                                                    throws IOException {
-    return new UpgradeStatusReport(getVersion(), getUpgradeStatus(), false);
-  }
+	public String getDescription() {
+		return "Upgrade object for " + getType() + " layout version "
+				+ getVersion();
+	}
 
-  public int compareTo(Upgradeable o) {
-    if(this.getVersion() != o.getVersion())
-      return (getVersion() > o.getVersion() ? -1 : 1);
-    int res = this.getType().toString().compareTo(o.getType().toString());
-    if(res != 0)
-      return res;
-    return getClass().getCanonicalName().compareTo(
-                    o.getClass().getCanonicalName());
-  }
+	public UpgradeStatusReport getUpgradeStatusReport(boolean details)
+			throws IOException {
+		return new UpgradeStatusReport(getVersion(), getUpgradeStatus(), false);
+	}
 
-  public boolean equals(Object o) {
-    if (!(o instanceof UpgradeObject)) {
-      return false;
-    }
-    return this.compareTo((UpgradeObject)o) == 0;
-  }
+	public int compareTo(Upgradeable o) {
+		if (this.getVersion() != o.getVersion())
+			return (getVersion() > o.getVersion() ? -1 : 1);
+		int res = this.getType().toString().compareTo(o.getType().toString());
+		if (res != 0)
+			return res;
+		return getClass().getCanonicalName().compareTo(
+				o.getClass().getCanonicalName());
+	}
 
-  public int hashCode() {
-    return new UOSignature(this).hashCode(); 
-  }
+	public boolean equals(Object o) {
+		if (!(o instanceof UpgradeObject)) {
+			return false;
+		}
+		return this.compareTo((UpgradeObject) o) == 0;
+	}
+
+	public int hashCode() {
+		return new UOSignature(this).hashCode();
+	}
 }

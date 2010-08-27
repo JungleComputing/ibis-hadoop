@@ -35,53 +35,53 @@ import org.kosmix.kosmosfs.access.KfsOutputChannel;
 
 class KFSOutputStream extends OutputStream {
 
-    private String path;
-    private KfsOutputChannel kfsChannel;
+	private String path;
+	private KfsOutputChannel kfsChannel;
 
-    public KFSOutputStream(KfsAccess kfsAccess, String path, short replication) {
-        this.path = path;
+	public KFSOutputStream(KfsAccess kfsAccess, String path, short replication) {
+		this.path = path;
 
-        this.kfsChannel = kfsAccess.kfs_create(path, replication);
-    }
+		this.kfsChannel = kfsAccess.kfs_create(path, replication);
+	}
 
-    public long getPos() throws IOException {
-        if (kfsChannel == null) {
-            throw new IOException("File closed");
-        }
-        return kfsChannel.tell();
-    }
+	public long getPos() throws IOException {
+		if (kfsChannel == null) {
+			throw new IOException("File closed");
+		}
+		return kfsChannel.tell();
+	}
 
-    public void write(int v) throws IOException {
-        if (kfsChannel == null) {
-            throw new IOException("File closed");
-        }
-        byte[] b = new byte[1];
+	public void write(int v) throws IOException {
+		if (kfsChannel == null) {
+			throw new IOException("File closed");
+		}
+		byte[] b = new byte[1];
 
-        b[0] = (byte) v;
-        write(b, 0, 1);
-    }
+		b[0] = (byte) v;
+		write(b, 0, 1);
+	}
 
-    public void write(byte b[], int off, int len) throws IOException {
-        if (kfsChannel == null) {
-            throw new IOException("File closed");
-        }
+	public void write(byte b[], int off, int len) throws IOException {
+		if (kfsChannel == null) {
+			throw new IOException("File closed");
+		}
 
-        kfsChannel.write(ByteBuffer.wrap(b, off, len));
-    }
+		kfsChannel.write(ByteBuffer.wrap(b, off, len));
+	}
 
-    public void flush() throws IOException {
-        if (kfsChannel == null) {
-            throw new IOException("File closed");
-        }
-        kfsChannel.sync();
-    }
+	public void flush() throws IOException {
+		if (kfsChannel == null) {
+			throw new IOException("File closed");
+		}
+		kfsChannel.sync();
+	}
 
-    public synchronized void close() throws IOException {
-        if (kfsChannel == null) {
-            return;
-        }
-        flush();
-        kfsChannel.close();
-        kfsChannel = null;
-    }
+	public synchronized void close() throws IOException {
+		if (kfsChannel == null) {
+			return;
+		}
+		flush();
+		kfsChannel.close();
+		kfsChannel = null;
+	}
 }

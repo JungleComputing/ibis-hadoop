@@ -32,25 +32,23 @@ import org.apache.hadoop.io.compress.CompressionCodecFactory;
  * exists, the key will be the entire line and value will be empty.
  */
 public class KeyValueTextInputFormat extends FileInputFormat<Text, Text>
-  implements JobConfigurable {
+		implements JobConfigurable {
 
-  private CompressionCodecFactory compressionCodecs = null;
-  
-  public void configure(JobConf conf) {
-    compressionCodecs = new CompressionCodecFactory(conf);
-  }
-  
-  protected boolean isSplitable(FileSystem fs, Path file) {
-    return compressionCodecs.getCodec(file) == null;
-  }
-  
-  public RecordReader<Text, Text> getRecordReader(InputSplit genericSplit,
-                                                  JobConf job,
-                                                  Reporter reporter)
-    throws IOException {
-    
-    reporter.setStatus(genericSplit.toString());
-    return new KeyValueLineRecordReader(job, (FileSplit) genericSplit);
-  }
+	private CompressionCodecFactory compressionCodecs = null;
+
+	public void configure(JobConf conf) {
+		compressionCodecs = new CompressionCodecFactory(conf);
+	}
+
+	protected boolean isSplitable(FileSystem fs, Path file) {
+		return compressionCodecs.getCodec(file) == null;
+	}
+
+	public RecordReader<Text, Text> getRecordReader(InputSplit genericSplit,
+			JobConf job, Reporter reporter) throws IOException {
+
+		reporter.setStatus(genericSplit.toString());
+		return new KeyValueLineRecordReader(job, (FileSplit) genericSplit);
+	}
 
 }

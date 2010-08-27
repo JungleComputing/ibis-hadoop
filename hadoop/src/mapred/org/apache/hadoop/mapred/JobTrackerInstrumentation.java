@@ -19,45 +19,45 @@ package org.apache.hadoop.mapred;
 
 class JobTrackerInstrumentation {
 
-  protected final JobTracker tracker;
-  
-  public JobTrackerInstrumentation(JobTracker jt, JobConf conf) {
-    tracker = jt;
-  }
+	protected final JobTracker tracker;
 
-  public void launchMap(TaskAttemptID taskAttemptID)
-  { }
+	public JobTrackerInstrumentation(JobTracker jt, JobConf conf) {
+		tracker = jt;
+	}
 
-  public void completeMap(TaskAttemptID taskAttemptID)
-  { }
+	public void launchMap(TaskAttemptID taskAttemptID) {
+	}
 
-  public void failedMap(TaskAttemptID taskAttemptID)
-  { }
+	public void completeMap(TaskAttemptID taskAttemptID) {
+	}
 
-  public void launchReduce(TaskAttemptID taskAttemptID)
-  { }
+	public void failedMap(TaskAttemptID taskAttemptID) {
+	}
 
-  public void completeReduce(TaskAttemptID taskAttemptID)
-  { }
-  
-  public void failedReduce(TaskAttemptID taskAttemptID)
-  { }
+	public void launchReduce(TaskAttemptID taskAttemptID) {
+	}
 
-  public void submitJob(JobConf conf, JobID id) 
-  { }
-    
-  public void completeJob(JobConf conf, JobID id) 
-  { }
+	public void completeReduce(TaskAttemptID taskAttemptID) {
+	}
 
-  public void terminateJob(JobConf conf, JobID id) 
-  { }
-  
-  public void finalizeJob(JobConf conf, JobID id) 
-  { }
-  
-  public void addWaiting(JobID id, int tasks)
-  { }
+	public void failedReduce(TaskAttemptID taskAttemptID) {
+	}
 
-  public void decWaiting(JobID id, int tasks)
-  { }
+	public void submitJob(JobConf conf, JobID id) {
+	}
+
+	public void completeJob(JobConf conf, JobID id) {
+	}
+
+	public void terminateJob(JobConf conf, JobID id) {
+	}
+
+	public void finalizeJob(JobConf conf, JobID id) {
+	}
+
+	public void addWaiting(JobID id, int tasks) {
+	}
+
+	public void decWaiting(JobID id, int tasks) {
+	}
 }

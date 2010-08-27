@@ -23,8 +23,8 @@ package org.apache.hadoop.fs.s3;
  */
 public class S3Exception extends RuntimeException {
 
-  public S3Exception(Throwable t) {
-    super(t);
-  }
+	public S3Exception(Throwable t) {
+		super(t);
+	}
 
 }

@@ -18,13 +18,13 @@
 package org.apache.hadoop.fs.s3;
 
 /**
- * Thrown when Hadoop cannot read the version of the data stored
- * in {@link S3FileSystem}.
+ * Thrown when Hadoop cannot read the version of the data stored in
+ * {@link S3FileSystem}.
  */
 public class VersionMismatchException extends S3FileSystemException {
-  public VersionMismatchException(String clientVersion, String dataVersion) {
-    super("Version mismatch: client expects version " + clientVersion +
-        ", but data has version " +
-        (dataVersion == null ? "[unversioned]" : dataVersion));
-  }
+	public VersionMismatchException(String clientVersion, String dataVersion) {
+		super("Version mismatch: client expects version " + clientVersion
+				+ ", but data has version "
+				+ (dataVersion == null ? "[unversioned]" : dataVersion));
+	}
 }

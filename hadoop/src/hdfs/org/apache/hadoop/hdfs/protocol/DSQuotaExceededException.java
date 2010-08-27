@@ -21,23 +21,25 @@ package org.apache.hadoop.hdfs.protocol;
 import org.apache.hadoop.util.StringUtils;
 
 public class DSQuotaExceededException extends QuotaExceededException {
-  protected static final long serialVersionUID = 1L;
+	protected static final long serialVersionUID = 1L;
 
-  public DSQuotaExceededException(String msg) {
-    super(msg);
-  }
+	public DSQuotaExceededException(String msg) {
+		super(msg);
+	}
 
-  public DSQuotaExceededException(long quota, long count) {
-    super(quota, count);
-  }
+	public DSQuotaExceededException(long quota, long count) {
+		super(quota, count);
+	}
 
-  public String getMessage() {
-    String msg = super.getMessage();
-    if (msg == null) {
-      return "The DiskSpace quota" + (pathName==null?"":(" of " + pathName)) + 
-          " is exceeded: quota=" + quota + " diskspace consumed=" + StringUtils.humanReadableInt(count);
-    } else {
-      return msg;
-    }
-  }
+	public String getMessage() {
+		String msg = super.getMessage();
+		if (msg == null) {
+			return "The DiskSpace quota"
+					+ (pathName == null ? "" : (" of " + pathName))
+					+ " is exceeded: quota=" + quota + " diskspace consumed="
+					+ StringUtils.humanReadableInt(count);
+		} else {
+			return msg;
+		}
+	}
 }

@@ -26,20 +26,26 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.Progressable;
 
 /**
- * Consume all outputs and put them in /dev/null. 
- * @deprecated Use 
- *   {@link org.apache.hadoop.mapreduce.lib.output.NullOutputFormat} instead.
+ * Consume all outputs and put them in /dev/null.
+ * 
+ * @deprecated Use
+ *             {@link org.apache.hadoop.mapreduce.lib.output.NullOutputFormat}
+ *             instead.
  */
 @Deprecated
 public class NullOutputFormat<K, V> implements OutputFormat<K, V> {
-  
-  public RecordWriter<K, V> getRecordWriter(FileSystem ignored, JobConf job, 
-                                      String name, Progressable progress) {
-    return new RecordWriter<K, V>(){
-        public void write(K key, V value) { }
-        public void close(Reporter reporter) { }
-      };
-  }
-  
-  public void checkOutputSpecs(FileSystem ignored, JobConf job) { }
+
+	public RecordWriter<K, V> getRecordWriter(FileSystem ignored, JobConf job,
+			String name, Progressable progress) {
+		return new RecordWriter<K, V>() {
+			public void write(K key, V value) {
+			}
+
+			public void close(Reporter reporter) {
+			}
+		};
+	}
+
+	public void checkOutputSpecs(FileSystem ignored, JobConf job) {
+	}
 }

@@ -25,21 +25,19 @@ import org.apache.hadoop.security.authorize.Service;
  * {@link PolicyProvider} for Map-Reduce protocols.
  */
 public class MapReducePolicyProvider extends PolicyProvider {
-  private static final Service[] mapReduceServices = 
-    new Service[] {
-      new Service("security.inter.tracker.protocol.acl", 
-                  InterTrackerProtocol.class),
-      new Service("security.job.submission.protocol.acl",
-                  JobSubmissionProtocol.class),
-      new Service("security.task.umbilical.protocol.acl", 
-                  TaskUmbilicalProtocol.class),
-      new Service("security.refresh.policy.protocol.acl", 
-                  RefreshAuthorizationPolicyProtocol.class),
-  };
-  
-  @Override
-  public Service[] getServices() {
-    return mapReduceServices;
-  }
+	private static final Service[] mapReduceServices = new Service[] {
+			new Service("security.inter.tracker.protocol.acl",
+					InterTrackerProtocol.class),
+			new Service("security.job.submission.protocol.acl",
+					JobSubmissionProtocol.class),
+			new Service("security.task.umbilical.protocol.acl",
+					TaskUmbilicalProtocol.class),
+			new Service("security.refresh.policy.protocol.acl",
+					RefreshAuthorizationPolicyProtocol.class), };
+
+	@Override
+	public Service[] getServices() {
+		return mapReduceServices;
+	}
 
 }

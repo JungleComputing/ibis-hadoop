@@ -228,11 +228,11 @@ public class RPC {
 		private boolean isClosed = false;
 
 		public Invoker(VirtualSocketAddress address,
-				UserGroupInformation ticket, Configuration conf,
-				VirtualSocketFactory factory) {
+				UserGroupInformation ticket, Configuration conf)
+				throws IOException {
 			this.address = address;
 			this.ticket = ticket;
-			this.client = CLIENTS.getClient(conf, factory);
+			this.client = CLIENTS.getClient(conf);
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args)
@@ -370,29 +370,12 @@ public class RPC {
 	 * talking to a server at the named address.
 	 */
 	public static VersionedProtocol getProxy(Class<?> protocol,
-			long clientVersion, VirtualSocketAddress addr, Configuration conf,
-			VirtualSocketFactory factory) throws IOException {
-		UserGroupInformation ugi = null;
-		try {
-			ugi = UserGroupInformation.login(conf);
-		} catch (LoginException le) {
-			throw new RuntimeException("Couldn't login!");
-		}
-		return getProxy(protocol, clientVersion, addr, ugi, conf, factory);
-	}
-
-	/**
-	 * Construct a client-side proxy object that implements the named protocol,
-	 * talking to a server at the named address.
-	 */
-	public static VersionedProtocol getProxy(Class<?> protocol,
 			long clientVersion, VirtualSocketAddress addr,
-			UserGroupInformation ticket, Configuration conf,
-			VirtualSocketFactory factory) throws IOException {
+			UserGroupInformation ticket, Configuration conf) throws IOException {
 
 		VersionedProtocol proxy = (VersionedProtocol) Proxy.newProxyInstance(
 				protocol.getClassLoader(), new Class[] { protocol },
-				new Invoker(addr, ticket, conf, factory));
+				new Invoker(addr, ticket, conf));
 		long serverVersion = proxy.getProtocolVersion(protocol.getName(),
 				clientVersion);
 		if (serverVersion == clientVersion) {
@@ -417,8 +400,7 @@ public class RPC {
 			long clientVersion, VirtualSocketAddress addr, Configuration conf)
 			throws IOException {
 
-		return getProxy(protocol, clientVersion, addr, conf, NetUtils
-				.getDefaultSocketFactory(conf));
+		return getProxy(protocol, clientVersion, addr, conf);
 	}
 
 	/**
@@ -479,21 +461,19 @@ public class RPC {
 	 * Construct a server for a protocol implementation instance listening on a
 	 * port and address.
 	 */
-	public static Server getServer(final Object instance,
-			final String bindAddress, final int port, Configuration conf)
-			throws IOException {
-		return getServer(instance, bindAddress, port, 1, false, conf);
+	public static Server getServer(final Object instance, final int port,
+			Configuration conf) throws IOException {
+		return getServer(instance, port, 1, false, conf);
 	}
 
 	/**
 	 * Construct a server for a protocol implementation instance listening on a
 	 * port and address.
 	 */
-	public static Server getServer(final Object instance,
-			final String bindAddress, final int port, final int numHandlers,
-			final boolean verbose, Configuration conf) throws IOException {
-		return new Server(instance, conf, bindAddress, port, numHandlers,
-				verbose);
+	public static Server getServer(final Object instance, final int port,
+			final int numHandlers, final boolean verbose, Configuration conf)
+			throws IOException {
+		return new Server(instance, conf, port, numHandlers, verbose);
 	}
 
 	/** An RPC Server. */
@@ -514,9 +494,9 @@ public class RPC {
 		 * @param port
 		 *            the port to listen for connections on
 		 */
-		public Server(Object instance, Configuration conf, String bindAddress,
-				int port) throws IOException {
-			this(instance, conf, bindAddress, port, 1, false);
+		public Server(Object instance, Configuration conf, int port)
+				throws IOException {
+			this(instance, conf, port, 1, false);
 		}
 
 		private static String classNameBase(String className) {
@@ -543,9 +523,9 @@ public class RPC {
 		 * @param verbose
 		 *            whether each call should be logged
 		 */
-		public Server(Object instance, Configuration conf, String bindAddress,
-				int port, int numHandlers, boolean verbose) throws IOException {
-			super(bindAddress, port, Invocation.class, numHandlers, conf,
+		public Server(Object instance, Configuration conf, int port,
+				int numHandlers, boolean verbose) throws IOException {
+			super(port, Invocation.class, numHandlers, conf,
 					classNameBase(instance.getClass().getName()));
 			this.instance = instance;
 			this.verbose = verbose;

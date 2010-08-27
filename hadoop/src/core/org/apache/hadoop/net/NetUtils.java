@@ -57,7 +57,7 @@ public class NetUtils {
 	 * @return the default socket factory as specified in the configuration or
 	 *         the JVM default socket factory if the configuration does not
 	 *         contain a default socket factory property.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static VirtualSocketFactory getDefaultSocketFactory(
 			Configuration conf) throws IOException {
@@ -66,29 +66,6 @@ public class NetUtils {
 			return VirtualSocketFactory.getDefaultSocketFactory();
 		} catch (InitializationException e) {
 			throw new IOException(e);
-		}
-	}
-
-	/**
-	 * Get the socket factory corresponding to the given proxy URI. If the given
-	 * proxy URI corresponds to an absence of configuration parameter, returns
-	 * null. If the URI is malformed raises an exception.
-	 * 
-	 * @param propValue
-	 *            the property which is the class name of the SocketFactory to
-	 *            instantiate; assumed non null and non empty.
-	 * @return a socket factory as defined in the property value.
-	 */
-	public static SocketFactory getSocketFactoryFromProperty(
-			Configuration conf, String propValue) {
-
-		try {
-			Class<?> theClass = conf.getClassByName(propValue);
-			return (SocketFactory) ReflectionUtils.newInstance(theClass, conf);
-
-		} catch (ClassNotFoundException cnfe) {
-			throw new RuntimeException("Socket Factory class not found: "
-					+ cnfe);
 		}
 	}
 
@@ -237,23 +214,6 @@ public class NetUtils {
 			}
 			return l;
 		}
-	}
-
-	/**
-	 * Returns InetSocketAddress that a client can use to connect to the server.
-	 * Server.getListenerAddress() is not correct when the server binds to
-	 * "0.0.0.0". This returns "127.0.0.1:port" when the getListenerAddress()
-	 * returns "0.0.0.0:port".
-	 * 
-	 * @param server
-	 * @return socket address that a client can use to connect to the server.
-	 */
-	public static InetSocketAddress getConnectAddress(Server server) {
-		InetSocketAddress addr = server.getListenerAddress();
-		if (addr.getAddress().getHostAddress().equals("0.0.0.0")) {
-			addr = new InetSocketAddress("127.0.0.1", addr.getPort());
-		}
-		return addr;
 	}
 
 	/**
