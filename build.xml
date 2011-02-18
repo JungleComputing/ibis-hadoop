@@ -8,8 +8,8 @@
 
     <property environment="env"/>
 
-    <property name="ipl" location="/home/niels/workspace/ipl/lib" />
-    <property name="hadoop" location="hadoop" />
+    <property name="ipl" location="${user.home}/workspace/ipl/lib" />
+    <property name="hadoop" location="external/hadoop" />
 
     <property name="version" value="" />
 
@@ -18,11 +18,7 @@
     <property name="lib" location="lib" />
     <property name="jar" location="lib/ibis-hadoop${version}.jar" />
 
-    <target name="build" description="build hadoop ibis" depends="clean,hadoop,copy-external,compile">
-    </target>
-
-    <target name="hadoop" description="build hadoop">
-    	<ant dir="hadoop" target="jar" />
+    <target name="build" description="build hadoop ibis" depends="clean,copy-external,compile">
     </target>
 
     <!-- Copy external libraries to lib directory -->
@@ -30,14 +26,13 @@
         <mkdir dir="lib" />
         <!-- IPL -->
         <echo message="using ipl from ${ipl}" />
-        <copy todir="lib/ipl">
+        <copy todir="lib">
             <fileset dir="${ipl}" />
         </copy>
          <!-- Hadoop -->
         <echo message="using hadoop from ${hadoop}" />
-        <copy todir="lib/hadoop">
-            <fileset dir="${hadoop}/build" includes="*.jar"/>
-            <fileset dir="${hadoop}/lib"/>
+        <copy todir="lib">
+            <fileset dir="${hadoop}" includes="*.jar"/>
         </copy>
         <!-- Other -->
         <copy todir="lib">
@@ -54,10 +49,7 @@
         <mkdir dir="${lib}" />
 
         <path id="default.classpath">
-            <fileset dir="lib/ipl">
-                <include name="*.jar" />
-            </fileset>
-            <fileset dir="lib/hadoop">
+            <fileset dir="lib">
                 <include name="*.jar" />
             </fileset>
         </path>
@@ -82,8 +74,6 @@
     <target name="clean" description="clean up">
         <delete dir="${tmp}" />
         <delete dir="${lib}" />
-
-    	<ant dir="hadoop" target="clean" />
     </target>
 
 </project>
